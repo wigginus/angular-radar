@@ -66,13 +66,14 @@
 					gRadar.append("circle")
 						.attr("cx", config.width / 2)
 						.attr("cy", config.height / 2)
-						.attr("r", config.size / 2.5)
+						.attr("r", config.size / 2.3)
 						.attr("class", "radar-chart-circle")
 						;
 
 						if (config.drawBubbles){
 							// draw orange bubbles around icons
 							var iconHeight = 100;
+							var imgScale = 2.17;
 
 							var imgCirclesContainer = gRadar
 							.selectAll("imgBubble")
@@ -84,8 +85,8 @@
 							var imgCirclesOutest = imgCirclesContainer
 							.append("circle")
 							.attr("class", "radar-image-bubble-outest")
-							.attr("cx", function(d, i){return getHorizontalPosition(i, config.size/2.3, config.legendScale);})
-							.attr("cy", function(d, i){return getVerticalPosition(i, config.size/2.3, config.legendScale);})
+							.attr("cx", function(d, i){return getHorizontalPosition(i, config.size/imgScale, config.legendScale);})
+							.attr("cy", function(d, i){return getVerticalPosition(i, config.size/imgScale, config.legendScale);})
 							.attr("r", iconHeight / 2 + 30)
 							.attr("transform", "translate(" + (iconHeight / 2) + ", " + (iconHeight / 2) + ")")
 							;
@@ -93,8 +94,8 @@
 							var imgCirclesOuter = imgCirclesContainer
 							.append("circle")
 							.attr("class", "radar-image-bubble-outer")
-							.attr("cx", function(d, i){return getHorizontalPosition(i, config.size/2.3, config.legendScale);})
-							.attr("cy", function(d, i){return getVerticalPosition(i, config.size/2.3, config.legendScale);})
+							.attr("cx", function(d, i){return getHorizontalPosition(i, config.size/imgScale, config.legendScale);})
+							.attr("cy", function(d, i){return getVerticalPosition(i, config.size/imgScale, config.legendScale);})
 							.attr("r", iconHeight / 2 + 20)
 							.attr("transform", "translate(" + (iconHeight / 2) + ", " + (iconHeight / 2) + ")")
 							;
@@ -102,8 +103,8 @@
 							var imgCircles = imgCirclesContainer
 							.append("circle")
 							.attr("class", "radar-image-bubble-inner")
-							.attr("cx", function(d, i){return getHorizontalPosition(i, config.size/2.3, config.legendScale);})
-							.attr("cy", function(d, i){return getVerticalPosition(i, config.size/2.3, config.legendScale);})
+							.attr("cx", function(d, i){return getHorizontalPosition(i, config.size/imgScale, config.legendScale);})
+							.attr("cy", function(d, i){return getVerticalPosition(i, config.size/imgScale, config.legendScale);})
 							.attr("r", iconHeight / 2 + 10)
 							.attr("transform", "translate(" + (iconHeight / 2) + ", " + (iconHeight / 2) + ")")
 							;
@@ -114,8 +115,8 @@
 							.append("g")
 							.append("circle")
 							.attr("class", "radar-image-circle")
-							.attr("cx", function(d, i){return getHorizontalPosition(i, config.size/2.3, config.legendScale);})
-							.attr("cy", function(d, i){return getVerticalPosition(i, config.size/2.3, config.legendScale);})
+							.attr("cx", function(d, i){return getHorizontalPosition(i, config.size/imgScale, config.legendScale);})
+							.attr("cy", function(d, i){return getVerticalPosition(i, config.size/imgScale, config.legendScale);})
 							.attr("r", iconHeight / 2)
 							.attr("transform", "translate(" + (iconHeight / 2) + ", " + (iconHeight / 2) + ")")
 							;
@@ -128,9 +129,9 @@
 							.attr("xlink:href", function(d){return d})
 							.attr("width", iconHeight)
 							.attr("height", iconHeight)
-							.attr("x", function(d, i){return getHorizontalPosition(i, config.size/2.3, config.legendScale);})
-							.attr("y", function(d, i){return getVerticalPosition(i, config.size/2.3, config.legendScale);})
-							//.attr("transform", "translate(" + (config.widthShift) + ", " config.heightShift) + ")")
+							.attr("x", function(d, i){return getHorizontalPosition(i, config.size/imgScale, config.legendScale);})
+							.attr("y", function(d, i){return getVerticalPosition(i, config.size/imgScale, config.legendScale);})
+							//.attr("transform", "translate(" + (-config.widthShift) + ", " + (-config.heightShift) + ")")
 							;
 						}
 												
@@ -205,13 +206,15 @@ scope.update = function(data){
 
 		var changedCategory = allChanged.filter(function(r){return r.changed})[0];
 
-		var bubbleUp = angular.element(".radar-image-bubble-"+changedCategory.axis.split(" ")[0]);
-		angular.element(".radar-image-bubble-"+changedCategory.axis.split(" ")[0])
-			.bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){ 
-			$animate.removeClass(bubbleUp, 'radar-image-bubble-shown');
-		});
+		if (config.drawBubbles){
+			var bubbleUp = angular.element(".radar-image-bubble-"+changedCategory.axis.split(" ")[0]);
+			angular.element(".radar-image-bubble-"+changedCategory.axis.split(" ")[0])
+				.bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){ 
+				$animate.removeClass(bubbleUp, 'radar-image-bubble-shown');
+			});
 
-		$animate.addClass(bubbleUp, 'radar-image-bubble-shown');
+			$animate.addClass(bubbleUp, 'radar-image-bubble-shown');
+		}
 
 		var series = 0;    
 		data.forEach(function(element, index){
@@ -240,6 +243,19 @@ scope.update = function(data){
 			;
 			series++;
 		}); 
+
+		/*Draw Outer Line*/
+		for(var j=0; j<config.levels; j++){
+			//var levelFactor = radius*((j+1)/config.levels);
+			var drawBasic = gRadar.selectAll(".levels").data(allAxis).enter().append("svg:line")
+			.attr("x1", function(d, i){return getHorizontalPosition(i, config.size/2, config.chartScale);})
+			.attr("y1", function(d, i){return getVerticalPosition(i, config.size/2, config.chartScale);})
+			.attr("x2", config.width / 2)
+			.attr("y2", config.height / 2);
+			drawBasic.attr("class", "radar-chart-line")
+			.style("stroke-width", 1.5)
+			.attr("transform", "translate(" + (-config.widthShift) + ", " + (-config.heightShift) + ")");  
+		}
 }
 
 scope.$watch('val', function(){
