@@ -24,7 +24,7 @@
 					width:scope.width||element[0].parentElement.offsetWidth,
 					height:scope.height||element[0].parentElement.offsetHeight,
 					chartScale: scope.chartScale || 0.6,
-					legendScale: scope.legendScale||0.8,
+					legendScale: scope.legendScale||0.75,
 					levels: scope.levels||3,
 					maxValue: scope.maxValue || 0,
 					radians: scope.radians||2 * Math.PI,
@@ -71,9 +71,10 @@
 						;
 
 						if (config.drawBubbles){
-							// draw orange bubbles around icons
-							var iconHeight = 100;
-							var imgScale = 2.17;
+							// draw bubbles around icons
+							var iconHeight = 50;
+							var bubbleHeight = iconHeight + 20;
+							var imgScale = 2.08;
 
 							var imgCirclesContainer = gRadar
 							.selectAll("imgBubble")
@@ -87,7 +88,7 @@
 							.attr("class", "radar-image-bubble-outest")
 							.attr("cx", function(d, i){return getHorizontalPosition(i, config.size/imgScale, config.legendScale);})
 							.attr("cy", function(d, i){return getVerticalPosition(i, config.size/imgScale, config.legendScale);})
-							.attr("r", iconHeight / 2 + 30)
+							.attr("r", bubbleHeight / 2 + 30)
 							.attr("transform", "translate(" + (iconHeight / 2) + ", " + (iconHeight / 2) + ")")
 							;
 
@@ -96,7 +97,7 @@
 							.attr("class", "radar-image-bubble-outer")
 							.attr("cx", function(d, i){return getHorizontalPosition(i, config.size/imgScale, config.legendScale);})
 							.attr("cy", function(d, i){return getVerticalPosition(i, config.size/imgScale, config.legendScale);})
-							.attr("r", iconHeight / 2 + 20)
+							.attr("r", bubbleHeight / 2 + 20)
 							.attr("transform", "translate(" + (iconHeight / 2) + ", " + (iconHeight / 2) + ")")
 							;
 
@@ -105,19 +106,18 @@
 							.attr("class", "radar-image-bubble-inner")
 							.attr("cx", function(d, i){return getHorizontalPosition(i, config.size/imgScale, config.legendScale);})
 							.attr("cy", function(d, i){return getVerticalPosition(i, config.size/imgScale, config.legendScale);})
-							.attr("r", iconHeight / 2 + 10)
+							.attr("r", bubbleHeight / 2 + 10)
 							.attr("transform", "translate(" + (iconHeight / 2) + ", " + (iconHeight / 2) + ")")
 							;
 
 							// draw white circle around icons
-							var iconHeight = 100;
 							var imgCircles = gRadar.selectAll("imgCircle").data(allImages).enter()
 							.append("g")
 							.append("circle")
 							.attr("class", "radar-image-circle")
 							.attr("cx", function(d, i){return getHorizontalPosition(i, config.size/imgScale, config.legendScale);})
 							.attr("cy", function(d, i){return getVerticalPosition(i, config.size/imgScale, config.legendScale);})
-							.attr("r", iconHeight / 2)
+							.attr("r", bubbleHeight / 2)
 							.attr("transform", "translate(" + (iconHeight / 2) + ", " + (iconHeight / 2) + ")")
 							;
 		
@@ -131,7 +131,6 @@
 							.attr("height", iconHeight)
 							.attr("x", function(d, i){return getHorizontalPosition(i, config.size/imgScale, config.legendScale);})
 							.attr("y", function(d, i){return getVerticalPosition(i, config.size/imgScale, config.legendScale);})
-							//.attr("transform", "translate(" + (-config.widthShift) + ", " + (-config.heightShift) + ")")
 							;
 						}
 												
@@ -203,10 +202,12 @@ scope.update = function(data){
 
 		var gRadar = d3.select(element[0]).select("svg").select("g");
 		gRadar.select("polygon").remove();
+		gRadar.selectAll(".radar-chart-line").remove();
 
-		var changedCategory = allChanged.filter(function(r){return r.changed})[0];
+		
 
 		if (config.drawBubbles){
+			var changedCategory = allChanged.filter(function(r){return r.changed})[0];
 			var bubbleUp = angular.element(".radar-image-bubble-"+changedCategory.axis.split(" ")[0]);
 			angular.element(".radar-image-bubble-"+changedCategory.axis.split(" ")[0])
 				.bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){ 
@@ -215,47 +216,49 @@ scope.update = function(data){
 
 			$animate.addClass(bubbleUp, 'radar-image-bubble-shown');
 		}
+									
 
-		var series = 0;    
-		data.forEach(function(element, index){
-			var dataValues = [];
-			element.forEach(function(element, index){
-				dataValues.push([
-					getHorizontalPosition(index, config.size/2, (parseFloat(Math.max(element.value, 0.1))/config.maxValue)*config.chartScale),
-					getVerticalPosition(index, config.size/2, (parseFloat(Math.max(element.value, 0.1))/config.maxValue)*config.chartScale)
-					]);
-			});
+			/*Draw Area*/
+			var series = 0;    
+			data.forEach(function(element, index){
+				var dataValues = [];
+				element.forEach(function(element, index){
+					dataValues.push([
+						getHorizontalPosition(index, config.size/2, (parseFloat(Math.max(element.value, 0.1))/config.maxValue)*config.chartScale),
+						getVerticalPosition(index, config.size/2, (parseFloat(Math.max(element.value, 0.1))/config.maxValue)*config.chartScale)
+						]);
+				});
 
-			var polygon = gRadar.selectAll(".area")
-			.data([dataValues])
-			.enter()
-			.append("polygon")
-			.attr("class", "radar-chart-polygon")
-			.attr("points",function(d) {
-				var str="";
-				for(var pti=0;pti<d.length;pti++){
-					str=str+d[pti][0]+","+d[pti][1]+" ";
-				}
-				return str;
-			})
-			.style("fill-opacity", config.opacityArea)
-			.attr("transform", "translate(" + (-config.widthShift) + ", " + (-config.heightShift) + ")")
-			;
-			series++;
-		}); 
+				var polygon = gRadar.selectAll(".area")
+				.data([dataValues])
+				.enter()
+				.append("polygon")
+				.attr("class", "radar-chart-polygon")
+				.attr("points",function(d) {
+					var str="";
+					for(var pti=0;pti<d.length;pti++){
+						str=str+d[pti][0]+","+d[pti][1]+" ";
+					}
+					return str;
+				})
+				.style("fill-opacity", config.opacityArea)
+				.attr("transform", "translate(" + (-config.widthShift) + ", " + (-config.heightShift) + ")")
+				;
+				series++;
+			}); 
 
-		/*Draw Outer Line*/
-		for(var j=0; j<config.levels; j++){
-			//var levelFactor = radius*((j+1)/config.levels);
-			var drawBasic = gRadar.selectAll(".levels").data(allAxis).enter().append("svg:line")
-			.attr("x1", function(d, i){return getHorizontalPosition(i, config.size/2, config.chartScale);})
-			.attr("y1", function(d, i){return getVerticalPosition(i, config.size/2, config.chartScale);})
-			.attr("x2", config.width / 2)
-			.attr("y2", config.height / 2);
-			drawBasic.attr("class", "radar-chart-line")
-			.style("stroke-width", 1.5)
-			.attr("transform", "translate(" + (-config.widthShift) + ", " + (-config.heightShift) + ")");  
-		}
+			/*Draw Outer Line*/
+			for(var j=0; j<config.levels; j++){
+				//var levelFactor = radius*((j+1)/config.levels);
+				var drawBasic = gRadar.selectAll(".levels").data(allAxis).enter().append("svg:line")
+				.attr("x1", function(d, i){return getHorizontalPosition(i, config.size/2, config.chartScale);})
+				.attr("y1", function(d, i){return getVerticalPosition(i, config.size/2, config.chartScale);})
+				.attr("x2", config.width / 2)
+				.attr("y2", config.height / 2);
+				drawBasic.attr("class", "radar-chart-line")
+				.style("stroke-width", 1.5)
+				.attr("transform", "translate(" + (-config.widthShift) + ", " + (-config.heightShift) + ")");  
+			}
 }
 
 scope.$watch('val', function(){
