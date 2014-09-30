@@ -207,6 +207,7 @@ scope.update = function(data){
 		
 
 		if (config.drawBubbles){
+			var changedCategory = allChanged.filter(function(r){return r.changed})[0];
 			if(changedCategory){
 				var bubbleUp = angular.element(".radar-image-bubble-"+changedCategory.axis.split(" ")[0]);
 				angular.element(".radar-image-bubble-"+changedCategory.axis.split(" ")[0])
