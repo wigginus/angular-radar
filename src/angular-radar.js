@@ -207,14 +207,15 @@ scope.update = function(data){
 		
 
 		if (config.drawBubbles){
-			var changedCategory = allChanged.filter(function(r){return r.changed})[0];
-			var bubbleUp = angular.element(".radar-image-bubble-"+changedCategory.axis.split(" ")[0]);
-			angular.element(".radar-image-bubble-"+changedCategory.axis.split(" ")[0])
-				.bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){ 
-				$animate.removeClass(bubbleUp, 'radar-image-bubble-shown');
-			});
+			if(changedCategory){
+				var bubbleUp = angular.element(".radar-image-bubble-"+changedCategory.axis.split(" ")[0]);
+				angular.element(".radar-image-bubble-"+changedCategory.axis.split(" ")[0])
+					.bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){ 
+					$animate.removeClass(bubbleUp, 'radar-image-bubble-shown');
+				});
 
-			$animate.addClass(bubbleUp, 'radar-image-bubble-shown');
+				$animate.addClass(bubbleUp, 'radar-image-bubble-shown');
+			}
 		}
 									
 
