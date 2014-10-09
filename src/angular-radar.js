@@ -204,8 +204,7 @@ scope.update = function(data){
 		var gRadar = d3.select(element[0]).select("svg").select("g");
 		gRadar.selectAll("polygon").remove();
 		gRadar.selectAll(".radar-chart-line").remove();
-
-		
+		gRadar.selectAll(".previous-event-label").remove();
 
 		if (config.drawBubbles){
 			var changedCategory = allChanged.filter(function(r){return r.changed})[0];
@@ -248,6 +247,16 @@ scope.update = function(data){
 				;
 				series++;
 			}); 
+
+			if (data[1]) {
+				gRadar.append("text")
+					.attr("x", config.width / 1.3)
+					.attr("y", config.height / 2)
+					.attr("class", "previous-event-label")
+					.text(data[1][0]["label"])
+					;
+			}
+
 
 			/*Draw Outer Line*/
 			for(var j=0; j<config.levels; j++){
