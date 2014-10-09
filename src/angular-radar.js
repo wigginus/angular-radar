@@ -61,7 +61,7 @@
 					}              
 
 					d3.select(element[0]).select("svg").remove();
-					var gRadar = d3.select(element[0]).append("svg").attr("width", config.width).attr("height", config.height).append("g");       
+					var gRadar = d3.select(element[0]).append("svg").attr("width", config.width).attr("height", config.height).append("g");
 
 					gRadar.append("circle")
 						.attr("cx", config.width / 2)
@@ -131,6 +131,7 @@
 							.attr("height", iconHeight)
 							.attr("x", function(d, i){return getHorizontalPosition(i, config.size/imgScale, config.legendScale);})
 							.attr("y", function(d, i){return getVerticalPosition(i, config.size/imgScale, config.legendScale);})
+							//.attr("transform", "translate(" + (-config.widthShift) + ", " + (-config.heightShift) + ")")
 							;
 						}
 												
@@ -150,7 +151,7 @@
 							.data([dataValues])
 							.enter()
 							.append("polygon")
-							.attr("class", "radar-chart-polygon")
+							.attr("class", "radar-chart-polygon radar-chart-polygon-"+series)
 							.attr("points",function(d) {
 								var str="";
 								for(var pti=0;pti<d.length;pti++){
@@ -201,7 +202,7 @@ scope.update = function(data){
 
 
 		var gRadar = d3.select(element[0]).select("svg").select("g");
-		gRadar.select("polygon").remove();
+		gRadar.selectAll("polygon").remove();
 		gRadar.selectAll(".radar-chart-line").remove();
 
 		
@@ -219,7 +220,6 @@ scope.update = function(data){
 			}
 		}
 									
-
 			/*Draw Area*/
 			var series = 0;    
 			data.forEach(function(element, index){
@@ -235,7 +235,7 @@ scope.update = function(data){
 				.data([dataValues])
 				.enter()
 				.append("polygon")
-				.attr("class", "radar-chart-polygon")
+				.attr("class", "radar-chart-polygon radar-chart-polygon-"+series)
 				.attr("points",function(d) {
 					var str="";
 					for(var pti=0;pti<d.length;pti++){
